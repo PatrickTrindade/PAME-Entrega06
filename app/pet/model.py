@@ -3,13 +3,13 @@ from ..extensions import db
 class Pet(db.Model):
     __tablename__           = 'pet'
     id                      = db.Column(db.Integer, primary_key=True)
-    nome                    = db.Column(db.String(63), nullable=True) # so será utilizada se o cliente for cadastrado
-
+    nome                    = db.Column(db.String(63), nullable=True)
     raca                    = db.Column(db.String(63), nullable=False)
     porte                   = db.Column(db.String(63), nullable=False) # pequeno / medio / grande
     data_nascimento         = db.Column(db.String(63), nullable=False) # para saber a idade do pet
 
     user_id                 = db.Column(db.String, db.ForeignKey('usuario.id'))
+
 
 
     #usuario                 = db.relationship("Usuario", backref="pets")   -> tava dando erro

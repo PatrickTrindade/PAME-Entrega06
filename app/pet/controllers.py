@@ -1,5 +1,7 @@
 from flask import request, Blueprint, jsonify
 from flask.views import MethodView
+from flask_jwt_extended import jwt_required, get_jwt_identity
+
 
 from app.pet.model import Pet
 from app.extensions import db
@@ -12,12 +14,16 @@ class PetDetails(MethodView):       #/pet
         return jsonify([pet.json() for pet in pets]), 200
 
     def post(self):
+
+        decorators = [jwt_required]     # ele precisa estar logado para adicionar um pet
+
         dados = request.json
         
         nome = dados.get('nome', "")
         raca = dados.get('raca')
         porte = dados.get('porte')
         data_nascimento = dados.get('data_nascimento')
+        user_id = get_jwt_identity()
 
         if (raca is None or porte is None or data_nascimento is None):
             return {'erro' : 'Falta um campo obrigatorio raca, porte ou nascimento'}, 400
@@ -25,7 +31,7 @@ class PetDetails(MethodView):       #/pet
         if(not isinstance(nome, str) or not isinstance(raca, str) or not isinstance(porte, str) or not isinstance(data_nascimento, str)):
             return {'erro' : 'nome, raca, porte, ou data de nascimento inválidos'}, 400
         
-        pet = Pet(nome = nome, raca = raca, porte = porte, data_nascimento = data_nascimento)
+        pet = Pet(nome = nome, raca = raca, porte = porte, data_nascimento = data_nascimento, user_id=user_id)
         
         db.session.add(pet) # não salva ainda, apenas 'coloca na fila' para ser salvo
 

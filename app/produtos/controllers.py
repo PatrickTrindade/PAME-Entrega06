@@ -4,7 +4,7 @@ from flask.views import MethodView
 from app.produtos.model import Produto
 from app.extensions import db
 
-class ProdutoDetails(MethodView):       #/produto
+class ProdutoDetails(MethodView):       #/produto/
     def get(self):
         produtos = Produto.query.all()   # pega todos os produtos
 
@@ -14,17 +14,18 @@ class ProdutoDetails(MethodView):       #/produto
         dados = request.json
         
         nome = dados.get('nome')
-        descricao = dados.get('descricao', "")
+        preco = dados.get('preco')
         qnt_estoque = dados.get('qnt_estoque', 0)
+        descricao = dados.get('descricao', "")
 
-        if (nome is None):
-            return {'erro' : 'O produto exige um nome'}, 400
+        if (nome is None or preco is None):
+            return {'erro' : 'O produto exige nome e preco'}, 400
 
-        if(not isinstance(nome, str) or not isinstance(descricao, str) or not isinstance(qnt_estoque, int)
+        if(not isinstance(nome, str) or not isinstance(descricao, str) or not isinstance(qnt_estoque, int) or not isinstance(preco, float)  
         or len(nome) > 63 or len(descricao) > 127):
-            return {'erro' : 'nome, descricao, ou qnt_estoque inválidos'}, 400
+            return {'erro' : 'nome, preco, qnt_estoque ou descricao inválidos'}, 400
         
-        produto = Produto(nome = nome, descricao = descricao, qnt_estoque = qnt_estoque)
+        produto = Produto(nome = nome, preco=preco, qnt_estoque = qnt_estoque, descricao = descricao)
         
         db.session.add(produto) # não salva ainda, apenas 'coloca na fila' para ser salvo
 
@@ -33,7 +34,7 @@ class ProdutoDetails(MethodView):       #/produto
         return produto.json(), 200
 
 
-class ProdutoPagina(MethodView):
+class ProdutoPagina(MethodView):        #/produto/<int:id>
     def get(self, id):
         produto = Produto.query.get_or_404(id) #se existir o produto retorna os dados, caso contrário sai da função retornando 404
 
