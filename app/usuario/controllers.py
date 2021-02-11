@@ -1,11 +1,11 @@
-from flask import request, jsonify, render_template #, Blueprint tirado durante a cap 10/02
-from app.usuario.model import Usuario
-from app.extensions import db
+from flask import request, jsonify, render_template
+from flask.views import MethodView
 import bcrypt
 from flask_mail import Message
-from flask_jwt_extended import create_acess_token
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 
-usuario_api = Blueprint('usuario_api', __name__) # armazena as rotas
+from app.usuario.model import Usuario
+from app.extensions import db, mail
 
 
 class UsuarioDetails(MethodView):        #usuario/
@@ -32,10 +32,14 @@ class UsuarioDetails(MethodView):        #usuario/
 
             return {'erro' : 'username, senha, nome, endereco ou email inválidos'}, 400
         
+        if(Usuario.query.filter_by(username=username).first()):
+            return {'erro' : 'O nome de usuário inserido já é utilizado por outra conta'}
+
+        if(Usuario.query.filter_by(email=email).first()):
+            return {'erro' : 'O email inserido já é utilizado por outra conta'}
+
 
         senha_hash = bcrypt.hashpw(senha.encode(), bcrypt.gensalt())
-        #para verificar -> bcrypt.checkpw(senha, hash(?))
-
 
         usuario = Usuario(username = username, senha = senha_hash, nome = nome, endereco = endereco, email = email)
         
@@ -43,18 +47,19 @@ class UsuarioDetails(MethodView):        #usuario/
 
         db.session.commit() # salva no banco oq foi add na 'fila'
 
-        msg = Message(sender='email@quemvaienviar.com',
+        msg = Message(
+                    sender='patricktrindade@poli.ufrj.br',
                     recipients=[email],
                     subject="Bem-vindo!",
-                    html=render_template('email01.html', nome=nome') 
+                    html=render_template('email01.html', nome=nome)
                     )
 
-        mail.send(msg)
+        #mail.send(msg)   # Comentar em testes para parar de receber email
 
         return usuario.json(), 200
 
 
-class PaginaUsuario(MethodView):    #usuario/<int:id>
+class UsuarioPagina(MethodView):    #usuario/<int:id>
 
     decorators = [jwt_required]
 
@@ -67,6 +72,9 @@ class PaginaUsuario(MethodView):    #usuario/<int:id>
         return usuario.json(), 200
 
     def patch(self, id):
+        if(get_jwt_identity() != id):
+            return {'erro' : "usuário não permitido"}, 400
+
         usuario = Usuario.query.get_or_404(id)
 
         dados = request.json
@@ -90,22 +98,24 @@ class PaginaUsuario(MethodView):    #usuario/<int:id>
 
         db.session.add(usuario)
 
+        return usuario.json(), 200
+
 
 class UsuarioLogin(MethodView): #/login
     def post(self):
         dados = request.json
 
-        senha = str(dados.get('password'))
-        email = dados.get('email')
+        username = dados.get('username')
+        senha = str(dados.get('senha'))
 
-        usuario = Usuario.query.filter_by(email=email).first()
+        usuario = Usuario.query.filter_by(username=username).first()
 
         if (not usuario or not bcrypt.checkpw(senha.encode(), usuario.senha)):
-            return ("erro": "Usuário não encontrado"), 400
+            return {"erro": "Usuário não encontrado"}, 400
 
-        token = create_acess_token(identity=usuario.id)
+        token = create_access_token(identity=usuario.id)
 
-        return {"token": token}, 400
+        return {"token": token}, 200
 
 
 

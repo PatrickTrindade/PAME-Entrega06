@@ -1,9 +1,9 @@
 from flask import request, Blueprint, jsonify
 from flask.views import MethodView
+
 from app.pet.model import Pet
 from app.extensions import db
 
-#pet_api = Blueprint('pet_api', __name__) # armazena as rotas
 
 class PetDetails(MethodView):       #/pet
     def get(self):
@@ -33,7 +33,7 @@ class PetDetails(MethodView):       #/pet
 
         return pet.json(), 200
 
-class PaginaPet(MethodView):        #/pet/<int:id>
+class PetPagina(MethodView):        #/pet/<int:id>
     def get(self, id):
         pet = Pet.query.get_or_404(id) #se existir o pet retorna os dados, caso contrário sai da função retornando 404
 
@@ -62,17 +62,21 @@ class PaginaPet(MethodView):        #/pet/<int:id>
 
         db.session.add(pet)
 
-    if (request.method == 'DELETE'):
+        db.session.commit() # executa no banco todas as tarefas que estavam na fila
+        return pet.json(), 200
+
+    def delete(self, id):
         #db.session.delete(pet)
+        #db.session.commit()
+
         return {"erro" : "recurso ainda nao disponivel"}
 
-    db.session.commit() # executa no banco todas as tarefas que estavam na fila
-    return pet.json(), 200
+    
 
 
 
 
-
+'''
 #essas func estao sendo subtituidas pela classe acima
 @pet_api.route('/pet', methods=['GET', 'POST'])
 def index():
@@ -137,3 +141,4 @@ def pagina_pet(id):
 
     db.session.commit() # executa no banco todas as tarefas que estavam na fila
     return pet.json(), 200
+'''

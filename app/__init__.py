@@ -3,10 +3,10 @@ from .config import Config
 from .extensions import db, migrate, mail, jwt
 
 from app.pet.routes import pet_api
-from app.produtos.controllers import produto_api
-from app.servico.controllers import servico_api
-from app.usuario.controllers import usuario_api
-from app.van.controllers import van_api
+from app.produtos.routes import produto_api
+from app.servico.routes import servico_api
+from app.usuario.routes import usuario_api
+from app.van.routes import van_api
 
 '''
 from .pet.model import Pet
