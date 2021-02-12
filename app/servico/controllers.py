@@ -28,6 +28,9 @@ class ServicoDetails(MethodView):       #/servico/
         or len(horario) > 20 or len(descricao) > 127 ):
 
             return {"erro" : "Campo com formato invalido"}, 400
+
+        if(not banho and not tosa):
+            return {"erro" : "É preciso marcar pelo menos uma opção banho ou tosa"}
         
         servico = Servico(horario = horario, pet_id = pet_id, descricao = descricao, banho=banho, tosa=tosa)
         

@@ -1,6 +1,6 @@
 from flask import request, Blueprint, jsonify
 from flask.views import MethodView
-from flask_jwt_extended import jwt_required, get_jwt_identity
+#from flask_jwt_extended import jwt_required, get_jwt_identity
 
 
 from app.pet.model import Pet
@@ -15,7 +15,9 @@ class PetDetails(MethodView):       #/pet
 
     def post(self):
 
-        decorators = [jwt_required]     # ele precisa estar logado para adicionar um pet
+        #decorators = [jwt_required]     # ele precisa estar logado para adicionar um pet
+
+        print("g:", get_jwt_identity())
 
         dados = request.json
         
@@ -23,7 +25,7 @@ class PetDetails(MethodView):       #/pet
         raca = dados.get('raca')
         porte = dados.get('porte')
         data_nascimento = dados.get('data_nascimento')
-        user_id = get_jwt_identity()
+        #user_id = get_jwt_identity() #-> o objetivo era pegar o id do usuario logado
 
         if (raca is None or porte is None or data_nascimento is None):
             return {'erro' : 'Falta um campo obrigatorio raca, porte ou nascimento'}, 400

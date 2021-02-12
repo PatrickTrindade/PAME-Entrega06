@@ -12,6 +12,8 @@ class Pet(db.Model):
 
 
 
+
+
     #usuario                 = db.relationship("Usuario", backref="pets")   -> tava dando erro
     #servico                 = db.relationship("Servico", backref="pet")     -> tava dando erro
 

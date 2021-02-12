@@ -64,6 +64,8 @@ class UsuarioPagina(MethodView):    #usuario/<int:id>
     decorators = [jwt_required]
 
     def get(self, id):
+        print("g:", get_jwt_identity())
+        print("id", id)
         if(get_jwt_identity() != id):
             return {'erro' : "usuário não permitido"}, 400
 
